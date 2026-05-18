@@ -1,0 +1,50 @@
+name: Run Volume Shocker FNO Script
+
+# ये है सबसे IMPORTANT part - यहाँ time set होता है!
+on:
+  schedule:
+    # सुबह 9:25 AM IST के लिए (IST = UTC+5:30)
+    # तो 9:25 - 5:30 = 3:55 UTC
+    - cron: '55 3 * * 1-5'   # Monday to Friday at 3:55 UTC = 9:25 AM IST
+    
+    # दोपहर 3:15 PM IST के लिए
+    # 15:15 - 5:30 = 9:45 UTC
+    - cron: '45 9 * * 1-5'   # Monday to Friday at 9:45 UTC = 3:15 PM IST
+  
+  # MANUAL RUN का option - test करने के लिए
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: GitHub से code download करो
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # Step 2: Python install करो
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'  # अपनी Python version डालो
+      
+      # Step 3: Dependencies install करो (जरूरी libraries)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      
+      # Step 4: तुम्हारा script RUN करो!
+      - name: Run FNO Volume Shocker
+        run: python Volume_Shocker_fno.py
+        
+      # Optional: Log file save करना चाहो तो
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: execution-logs
+          path: |
+            *.log
+            *.csv
